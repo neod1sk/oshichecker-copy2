@@ -111,7 +111,7 @@ export default function ResultMemberCard({
               </div>
               <div className="flex justify-between">
                 <span>Wins</span>
-                <span>{candidate.battleWins}</span>
+                <span>{candidate.winCount}</span>
               </div>
             </div>
           </div>
