@@ -1,19 +1,36 @@
 [
   {
     "id": "member-01",
-    "name": "メンバー1",
-    "nameKo": "멤버 1",
-    "nameEn": "Member 1",
-    "groupId": "group-a",
-    "photoUrl": "https://placehold.co/400x400/FF6B9D/white?text=1",
-    "tags": ["cute", "energetic", "youngest"],
+    "name": "ハルナ",
+    "nameKo": "하루나",
+    "nameEn": "HARUNA",
+    "groupId": "KOKOIYA",
+    "photoUrl": "",
+    "tags": ["sexy", "kind", "face_raccoon_dog"],
     "scores": {
-      "cute": 5,
-      "cool": 1,
-      "energetic": 4,
-      "calm": 1,
-      "funny": 3,
-      "mysterious": 1
+      "genre_magical": 1,
+      "genre_orthodox": 2,
+      "sexy": 2,
+      "elegant": 3,
+      "facial": 3,
+      "stability": 2,
+      "kind": 3,
+      "cheer": 2,
+      "face_cat": 2,
+      "face_fox": 3,
+      "face_dog": 1
+    },
+    "jpSupport": "some",
+    "covers": {
+      "artist_chula": 2,
+      "artist_miracle_fanfare": 1,
+      "artist_appare!": 1,
+      "artist_ilife": 1,
+      "artist_nonfict": 1,
+      "artist_nekopla_pixx": 1,
+      "artist_pimms": 1,
+      "artist_sakusaku_jumble": 1,
+      "artist_jiemei": 1
     }
   },
   {
@@ -31,7 +48,9 @@
       "calm": 3,
       "funny": 2,
       "mysterious": 3
-    }
+    },
+    "jpSupport": "unknown",
+    "covers": {}
   },
   {
     "id": "member-03",
@@ -48,7 +67,9 @@
       "calm": 1,
       "funny": 5,
       "mysterious": 1
-    }
+    },
+    "jpSupport": "unknown",
+    "covers": {}
   },
   {
     "id": "member-04",
@@ -65,7 +86,9 @@
       "calm": 5,
       "funny": 1,
       "mysterious": 5
-    }
+    },
+    "jpSupport": "unknown",
+    "covers": {}
   },
   {
     "id": "member-05",
@@ -82,7 +105,9 @@
       "calm": 4,
       "funny": 2,
       "mysterious": 2
-    }
+    },
+    "jpSupport": "unknown",
+    "covers": {}
   },
   {
     "id": "member-06",
@@ -99,7 +124,9 @@
       "calm": 1,
       "funny": 3,
       "mysterious": 2
-    }
+    },
+    "jpSupport": "unknown",
+    "covers": {}
   },
   {
     "id": "member-07",
@@ -116,7 +143,9 @@
       "calm": 2,
       "funny": 4,
       "mysterious": 1
-    }
+    },
+    "jpSupport": "unknown",
+    "covers": {}
   },
   {
     "id": "member-08",
@@ -133,7 +162,9 @@
       "calm": 3,
       "funny": 2,
       "mysterious": 5
-    }
+    },
+    "jpSupport": "unknown",
+    "covers": {}
   },
   {
     "id": "member-09",
@@ -150,7 +181,9 @@
       "calm": 1,
       "funny": 4,
       "mysterious": 2
-    }
+    },
+    "jpSupport": "unknown",
+    "covers": {}
   },
   {
     "id": "member-10",
@@ -167,6 +200,8 @@
       "calm": 5,
       "funny": 3,
       "mysterious": 3
-    }
+    },
+    "jpSupport": "unknown",
+    "covers": {}
   }
 ]

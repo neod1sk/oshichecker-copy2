@@ -17,6 +17,8 @@ import {
 import { recordBattleResult } from "@/lib/battleLogic";
 import { calculateFinalRanking } from "@/lib/scoring";
 
+const defaultPreferForLevel = (): boolean => false;
+
 // ===========================================
 // SessionStorage キー
 // ===========================================
@@ -31,6 +33,8 @@ const initialState: DiagnosisState = {
   // Stage1: アンケート
   currentQuestionIndex: 0,
   surveyScores: {},
+  koreanLevel: "none",
+  preferJapaneseSupport: defaultPreferForLevel(),
 
   // Stage2: 二択バトル
   candidates: [],
@@ -53,7 +57,13 @@ function loadStateFromStorage(): DiagnosisState {
       const parsed = JSON.parse(saved) as DiagnosisState;
       // 基本的な検証
       if (typeof parsed.currentQuestionIndex === "number") {
-        return parsed;
+        return {
+          ...initialState,
+          ...parsed,
+          koreanLevel: parsed.koreanLevel ?? "none",
+          preferJapaneseSupport:
+            parsed.preferJapaneseSupport ?? defaultPreferForLevel(),
+        };
       }
     }
   } catch (e) {
@@ -130,7 +140,12 @@ function diagnosisReducer(
       // バトル完了時に最終ランキングを計算
       let finalRanking = state.finalRanking;
       if (newRound >= BATTLE_ROUNDS) {
-        finalRanking = calculateFinalRanking(updatedCandidates, newBattleRecords);
+        finalRanking = calculateFinalRanking(
+          updatedCandidates,
+          newBattleRecords,
+          state.koreanLevel ?? "none",
+          state.preferJapaneseSupport
+        );
       }
 
       newState = {
@@ -139,6 +154,43 @@ function diagnosisReducer(
         battleRecords: newBattleRecords,
         currentBattleRound: newRound,
         finalRanking,
+      };
+      break;
+    }
+
+    case "SET_KOREAN_LEVEL": {
+      newState = {
+        ...state,
+        koreanLevel: action.level,
+      };
+      break;
+    }
+
+    case "SET_PREFER_JP_SUPPORT": {
+      newState = {
+        ...state,
+        preferJapaneseSupport: action.value,
+      };
+      break;
+    }
+
+    case "ANSWER_MULTI": {
+      newState = {
+        ...state,
+        currentQuestionIndex: state.currentQuestionIndex + 1,
+        surveyScores: Object.entries(action.scores).reduce((acc, [key, value]) => {
+          acc[key] = (acc[key] || 0) + value;
+          return acc;
+        }, { ...state.surveyScores }),
+      };
+      break;
+    }
+
+    case "ANSWER_KOREAN_LEVEL": {
+      newState = {
+        ...state,
+        currentQuestionIndex: state.currentQuestionIndex + 1,
+        koreanLevel: action.level,
       };
       break;
     }
@@ -181,6 +233,10 @@ interface DiagnosisContextType {
   state: DiagnosisState;
   // アクション関数
   answerQuestion: (scoreKey: string, scoreValue: number) => void;
+  setKoreanLevel: (level: DiagnosisState["koreanLevel"]) => void;
+  setPreferJapaneseSupport: (value: boolean) => void;
+  answerMulti: (scores: Record<string, number>) => void;
+  answerKoreanLevel: (level: DiagnosisState["koreanLevel"]) => void;
   setCandidates: (candidates: CandidateMember[]) => void;
   recordBattle: (
     memberAId: string,
@@ -222,6 +278,22 @@ export function DiagnosisProvider({
   // アクション関数
   const answerQuestion = useCallback((scoreKey: string, scoreValue: number) => {
     dispatch({ type: "ANSWER_QUESTION", scoreKey, scoreValue });
+  }, []);
+
+  const setKoreanLevel = useCallback((level: DiagnosisState["koreanLevel"]) => {
+    dispatch({ type: "SET_KOREAN_LEVEL", level });
+  }, []);
+
+  const setPreferJapaneseSupport = useCallback((value: boolean) => {
+    dispatch({ type: "SET_PREFER_JP_SUPPORT", value });
+  }, []);
+
+  const answerMulti = useCallback((scores: Record<string, number>) => {
+    dispatch({ type: "ANSWER_MULTI", scores });
+  }, []);
+
+  const answerKoreanLevel = useCallback((level: DiagnosisState["koreanLevel"]) => {
+    dispatch({ type: "ANSWER_KOREAN_LEVEL", level });
   }, []);
 
   const setCandidates = useCallback((candidates: CandidateMember[]) => {
@@ -267,6 +339,10 @@ export function DiagnosisProvider({
   const value: DiagnosisContextType = {
     state,
     answerQuestion,
+    setKoreanLevel,
+    setPreferJapaneseSupport,
+    answerMulti,
+    answerKoreanLevel,
     setCandidates,
     recordBattle,
     reset,

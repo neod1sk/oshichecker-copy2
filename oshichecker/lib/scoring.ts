@@ -1,4 +1,31 @@
-import { Member, CandidateMember, BattleRecord, CANDIDATE_COUNT, RESULT_COUNT } from "./types";
+import {
+  Member,
+  CandidateMember,
+  BattleRecord,
+  CANDIDATE_COUNT,
+  RESULT_COUNT,
+  JpSupportLevel,
+  KoreanLevel,
+} from "./types";
+
+const LANGUAGE_BONUS_TABLE: Record<
+  KoreanLevel,
+  Record<JpSupportLevel, number>
+> = {
+  none: { ok: 1, some: 0.5, unknown: 0, no: 0 },
+  beginner: { ok: 1, some: 0.5, unknown: 0, no: 0 },
+  intermediate: { ok: 0.5, some: 0.3, unknown: 0, no: 0 },
+  advanced: { ok: 0, some: 0, unknown: 0, no: 0 },
+  native: { ok: 0, some: 0, unknown: 0, no: 0 },
+};
+
+export function getLanguageBonus(
+  koreanLevel: KoreanLevel,
+  jpSupport: JpSupportLevel
+): number {
+  const levelTable = LANGUAGE_BONUS_TABLE[koreanLevel] ?? LANGUAGE_BONUS_TABLE.none;
+  return levelTable[jpSupport] ?? 0;
+}
 
 /**
  * アンケートスコアに基づいてメンバーをスコアリング
@@ -11,10 +38,10 @@ export function scoreMembersBySurvey(
   surveyScores: Record<string, number>
 ): CandidateMember[] {
   const scored = members.map((member) => {
-    // メンバーの属性スコアとユーザーの回答スコアをマッチング
     let surveyScore = 0;
     for (const [key, userScore] of Object.entries(surveyScores)) {
-      const memberScore = member.scores[key] || 0;
+      // 通常属性 + artist系（covers）を同様に加点する
+      const memberScore = (member.scores[key] ?? member.covers?.[key]) || 0;
       surveyScore += memberScore * userScore;
     }
 
@@ -23,10 +50,12 @@ export function scoreMembersBySurvey(
       surveyScore,
       appearanceCount: 0,
       winCount: 0,
+      preferenceScore: 0,
+      languageBonus: 0,
+      finalScore: 0,
     };
   });
 
-  // スコア降順でソート
   scored.sort((a, b) => b.surveyScore - a.surveyScore);
 
   return scored;
@@ -43,29 +72,51 @@ export function getTopCandidates(
 }
 
 /**
- * 最終ランキングを計算（勝利数ベース + タイブレーク）
- * 
+ * 最終ランキングを計算（ハイブリッド言語ボーナス込み）
+ *
  * タイブレーク順序:
- * 1) surveyScore（アンケートスコア）が高い方
- * 2) 直接対決で勝った方
- * 3) memberId 昇順
+ * 1) finalScore（preference + languageBonus）
+ * 2) winCount
+ * 3) surveyScore
+ * 4) 直接対決
+ * 5) memberId 昇順
  */
 export function calculateFinalRanking(
   candidates: CandidateMember[],
-  battleRecords: BattleRecord[]
+  battleRecords: BattleRecord[],
+  userKoreanLevel: KoreanLevel = "none",
+  preferJapaneseSupport: boolean = true
 ): CandidateMember[] {
-  const sorted = [...candidates].sort((a, b) => {
-    // 1. 勝利数で比較
+  const withScores = candidates.map((candidate) => {
+    const preferenceScore = candidate.surveyScore + candidate.winCount;
+    const languageBonus = preferJapaneseSupport
+      ? getLanguageBonus(userKoreanLevel, candidate.member.jpSupport)
+      : 0;
+    const finalScore = preferenceScore + languageBonus;
+
+    return {
+      ...candidate,
+      preferenceScore,
+      languageBonus,
+      finalScore,
+    };
+  });
+
+  const sorted = withScores.sort((a, b) => {
+    const aFinal = a.finalScore ?? 0;
+    const bFinal = b.finalScore ?? 0;
+    if (bFinal !== aFinal) {
+      return bFinal - aFinal;
+    }
+
     if (b.winCount !== a.winCount) {
       return b.winCount - a.winCount;
     }
 
-    // 2. アンケートスコアで比較
     if (b.surveyScore !== a.surveyScore) {
       return b.surveyScore - a.surveyScore;
     }
 
-    // 3. 直接対決で比較
     const directBattle = battleRecords.find(
       (record) =>
         (record.memberA === a.member.id && record.memberB === b.member.id) ||
@@ -76,7 +127,6 @@ export function calculateFinalRanking(
       if (directBattle.winnerId === b.member.id) return 1;
     }
 
-    // 4. memberId 昇順
     return a.member.id.localeCompare(b.member.id);
   });
 

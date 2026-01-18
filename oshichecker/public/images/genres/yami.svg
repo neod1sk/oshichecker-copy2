@@ -1,0 +1,13 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad-yami" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9b6cff"/>
+      <stop offset="100%" stop-color="#6136c9"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="22" fill="url(#grad-yami)"/>
+  <path d="M24 34 C24 28 28 24 32 24 C36 24 40 28 40 34 C40 40 36 42 32 42 C28 42 24 40 24 34 Z" fill="#d9cbff"/>
+  <path d="M22 28 C26 24 30 22 34 24" stroke="#f1eaff" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <circle cx="28" cy="32" r="1.5" fill="#4b2aa6"/>
+  <circle cx="36" cy="32" r="1.5" fill="#4b2aa6"/>
+</svg>
